@@ -1,1 +1,6 @@
-This is first commit.
+	Proiectul Snake consta intr-un joc cu o grafica minimala care ne permite sa jucam cunoscutul joc "Snake". Cand rulam proiectul va porni o sesiune de joc si in acelasi timp un nou joc. Cand jucatorul pierde (sarpele isi musca 
+coada/ atinge un obstacol / atinge marginea plansei de joc in optiunea borderless = false) se va afisa un meniu unde se afla scorul final din meciul jucat, cel mai mare scor din toata sesiunea si doua butoane: play again care ne
+permite sa reincepem un nou joc sau quit care ne va trimite pe o pagina in care vom vedea cel mai mare scor din toata sesiunea de meciuri si dupa apasarea unui buton random se va incheia sesiunea.
+	Proiectul se va rula de la linia de comanda, folosind comanda "python snake.py config.json. In fisierul de configurare json se pot seta eventuale obstacole, dimensiunea plansei de joc, optiunea borderless care va face sarpele sa
+piarda in cazul atingerii marginilor plansei daca este setata pe false, iar in cazul in care este setata pe true sarpele va iesi prin capatul opus al plansei de joc.
+	Va trebui adaugat in venv modulul pygame cu comanda "pip install pygame".
