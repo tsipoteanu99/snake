@@ -193,12 +193,20 @@ class Snake:
             self.obstacles.append(tmp_obstacle)
 
     def save_obstacles(self):
+        """
+        Aceasta functie va actualiza lista de obstacole in cazul in care meciul abia a inceput.
+        :return:
+        """
         if self.obstacles_drawn == 0:
             for i in range(obstacles_number):
                 self.randomize_obstacles()
         self.obstacles_drawn = 1
 
     def increase_difficulty(self):
+        """
+        Aceasta functie creste dificultatea jocului (viteza sarpelui) cand scorul ajunge la 5 sau la un multiplu de 5 (diferit de 0).
+        :return:
+        """
         if self.score % 5 == 0 and self.score != 0 and self.difficulty_increased == 0:
             self.difficulty += 5
             self.difficulty_increased = 1
