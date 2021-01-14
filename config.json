@@ -93,5 +93,8 @@
     800,
     600
   ],
-  "borderless": true
+  "fps": 10,
+  "borderless": true,
+  "obstacles_number": 10,
+  "fixed_obstacle": false
 }

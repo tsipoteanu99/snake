@@ -35,10 +35,13 @@ def unpack_json():
 
 
 config = unpack_json()
+obstacles_number = config['obstacles_number']
 borderless = config['borderless']
+fixed = config['fixed_obstacle']
 obstacles = [tuple(x) for x in config['obstacles']]
 width = config['table_size'][0]
 height = config['table_size'][1]
+FPS = config['fps']
 
 # print("Borderless:", borderless)
 # print("Obstacles:", obstacles)
@@ -57,7 +60,6 @@ YELLOW = (139, 69, 19)
 BRIGHT_YELLOW = (160, 82, 45)
 BRIGHT_YELLOW2 = (205, 133, 63)
 BLACK = (0, 0, 0)
-FPS = 10
 block_size = 20
 best_score = 0
 font = pygame.font.SysFont('arial', 25)
@@ -70,7 +72,7 @@ clicked = False
 class Snake:
     BEST = 0
 
-    def __init__(self, w=width, h=height):
+    def __init__(self, w=width, h=height, fps=FPS):
         """
         In constructor am initial starea initiala a jocului, cum ar fi scorul, mancarea de pe harta,
         primele 3 componente ale sarpelui (capul si 2 blocuri de corp) si am pornit fereastra de joc.
@@ -80,8 +82,12 @@ class Snake:
         self.direction = Direction.RIGHT
         self.w = w // block_size * block_size
         self.h = h // block_size * block_size
+        self.difficulty = fps
         self.score = 0
+        self.obstacles_drawn = 0
         self.food = None
+        self.obstacles = []
+        self.difficulty_increased = 0
         self.head = Coord(self.w / 2, self.h / 2)
         self.tail = [self.head,
                      Coord(self.head.x - block_size, self.head.y),
@@ -129,12 +135,14 @@ class Snake:
         if self.head == self.food:
             self.score += 1
             self.randomize_food()
+            self.difficulty_increased = 0
         else:
             self.tail.pop()
         if self.score > self.BEST:
             self.BEST = self.score
+        self.increase_difficulty()
         self.render()
-        self.clock.tick(FPS)
+        self.clock.tick(self.difficulty)
 
         # 3.
         game_over = False
@@ -151,6 +159,8 @@ class Snake:
                              Coord(self.head.x - block_size, self.head.y),
                              Coord(self.head.x - (2 * block_size), self.head.y)]
                 self.score = 0
+                self.obstacles = []
+                self.obstacles_drawn = 0
                 self.food = None
                 self.randomize_food()
 
@@ -168,6 +178,30 @@ class Snake:
         self.food = Coord(x, y)
         if self.food in self.tail or self.food in obstacles:
             self.randomize_food()
+
+    def randomize_obstacles(self):
+        """
+        Aici se vor genera obstacole random in functie de un numar de obstacole primit de la tastatura.
+        :return:
+        """
+        x = random.randint(0, (self.w - block_size) // block_size) * block_size
+        y = random.randint(0, (self.h - block_size) // block_size) * block_size
+        tmp_obstacle = Coord(x, y)
+        if tmp_obstacle in self.tail or (tmp_obstacle.y == self.head.y and tmp_obstacle.x - self.head.x == 4*block_size):
+            self.randomize_obstacles()
+        else:
+            self.obstacles.append(tmp_obstacle)
+
+    def save_obstacles(self):
+        if self.obstacles_drawn == 0:
+            for i in range(obstacles_number):
+                self.randomize_obstacles()
+        self.obstacles_drawn = 1
+
+    def increase_difficulty(self):
+        if self.score % 5 == 0 and self.score != 0 and self.difficulty_increased == 0:
+            self.difficulty += 5
+            self.difficulty_increased = 1
 
     def render(self):
         """
@@ -250,17 +284,26 @@ class Snake:
             return True
         if self.head in self.tail[1:]:
             return True
-        if self.head in obstacles:
-            return True
+        if fixed:
+            if self.head in obstacles:
+                return True
+        else:
+            if self.head in self.obstacles:
+                return True
         return False
 
     def draw_obstacles(self):
         """
-        Aceasta functie va desena pe tabla de joc obstacolele in functie de coordonatele obstacolelor primite de la fisierul de configurare.
+        Aceasta functie va desena pe tabla de joc obstacolele in functie de datele obstacolelor primite de la fisierul de configurare.
         :return: No return.
         """
-        for obstacle in obstacles:
-            pygame.draw.rect(self.display, BLACK, pygame.Rect(obstacle[0], obstacle[1], block_size, block_size))
+        if fixed:
+            for obstacle in obstacles:
+                pygame.draw.rect(self.display, BLACK, pygame.Rect(obstacle[0], obstacle[1], block_size, block_size))
+        else:
+            self.save_obstacles()
+            for obstacle in self.obstacles:
+                pygame.draw.rect(self.display, BLACK, pygame.Rect(obstacle[0], obstacle[1], block_size, block_size))
 
 
 def display_best_score():
